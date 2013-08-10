@@ -11,3 +11,14 @@
 *.lai
 *.la
 *.a
+
+build
+
+# emacs ide
+.emacs.desktop
+.emacs-ide-project.txt
+TAGS
+cscope.files
+*.lock
+
+*#
