@@ -28,7 +28,7 @@ public:
    AliRsnTask    *GetParent() const { return fParent; }
    Int_t          GetLevel() const;
 
-   AliRsnTask    *GetList(TString path="/") const;
+   AliRsnTask    *GetListByPath(TString path="/") const;
 
 private:
 

@@ -28,8 +28,8 @@ void test()
 
    // main->Print();
 
-   TTask *t = main->GetList("/t1");
-   // TTask *t = main->GetList("/t1/t12");
+   TTask *t = main->GetListByPath("/t1");
+   // TTask *t = main->GetListByPath("/t1/t12");
    if (t) t->Print();
 
    return;

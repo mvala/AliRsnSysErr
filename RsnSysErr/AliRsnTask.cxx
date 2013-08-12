@@ -95,7 +95,7 @@ Int_t AliRsnTask::GetLevel() const
    return level;
 }
 
-AliRsnTask *AliRsnTask::GetList(TString path) const
+AliRsnTask *AliRsnTask::GetListByPath(TString path) const
 {
 
    // let's remove first '/'
@@ -127,5 +127,5 @@ AliRsnTask *AliRsnTask::GetList(TString path) const
    if (!t) return 0;
 
    // if yes, let's continue searching
-   return t->GetList(path);
+   return t->GetListByPath(path);
 }
