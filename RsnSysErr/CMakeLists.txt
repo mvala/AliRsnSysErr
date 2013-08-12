@@ -1,6 +1,7 @@
 set(MODULE RsnSysErr)
 
 set(SRCS
+AliRsnTask.cxx
 AliRsnSysErr.cxx
 )
 

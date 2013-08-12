@@ -22,10 +22,17 @@ void test()
    AliRsnSysErr *t22 = new AliRsnSysErr("t22","Test 2 2");
    t2->Add(t21);
    t2->Add(t22);
-
    
    main->Add(t1);
    main->Add(t2);
+
+   // main->Print();
+
+   TTask *t = main->GetList("/t1");
+   // TTask *t = main->GetList("/t1/t12");
+   if (t) t->Print();
+
+   return;
 
    main->ExecuteTask();
 

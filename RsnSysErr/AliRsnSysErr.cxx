@@ -12,8 +12,8 @@
 ClassImp(AliRsnSysErr)
 
 //__________________________________________________________________________________________________
-AliRsnSysErr::AliRsnSysErr(const char *name, const char *title) : TTask(name, title),
-   fParent(0)
+AliRsnSysErr::AliRsnSysErr(const char *name, const char *title) : AliRsnTask(name, title)
+
 {
 //
 // Defauult constructor
@@ -22,8 +22,7 @@ AliRsnSysErr::AliRsnSysErr(const char *name, const char *title) : TTask(name, ti
 }
 
 //__________________________________________________________________________________________________
-AliRsnSysErr::AliRsnSysErr(const AliRsnSysErr &copy) : TTask(copy),
-   fParent(copy.fParent)
+AliRsnSysErr::AliRsnSysErr(const AliRsnSysErr &copy) : AliRsnTask(copy)
 {
 //
 // Copy constructor
@@ -42,8 +41,6 @@ AliRsnSysErr &AliRsnSysErr::operator=(const AliRsnSysErr &copy)
    if (this == &copy)
       return *this;
 
-   fParent = copy.fParent;
-
    return (*this);
 }
 
@@ -55,30 +52,9 @@ AliRsnSysErr::~AliRsnSysErr()
 
 }
 
+
 void AliRsnSysErr::Exec(Option_t *option)
 {
-   Printf("Exec: %s level=%d", GetName(), GetLevel());
+   Printf("Executing: %s level=%d", GetName(), GetLevel());
 
-}
-
-void AliRsnSysErr::Add(TTask *task)
-{
-   TTask::Add(task);
-   
-   AliRsnSysErr *se = dynamic_cast<AliRsnSysErr *> (task);
-   if (se) se->SetParent(this);
-}
-
-
-Int_t AliRsnSysErr::GetLevel() const
-{
-   if (!fParent) return 0;
-
-   Int_t level=0;
-   AliRsnSysErr *p = GetParent();
-   while (p) {
-      p = p->GetParent();
-      level++;
-   }
-   return level;
 }
