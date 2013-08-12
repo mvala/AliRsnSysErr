@@ -19,7 +19,17 @@ public:
    AliRsnSysErr &operator=(const AliRsnSysErr &copy);
    virtual ~AliRsnSysErr();
 
+   virtual void	Add(TTask* task);
+   virtual void	Exec(Option_t* option);
+
+   void SetParent(AliRsnSysErr *se) { fParent = se; }
+   AliRsnSysErr *GetParent() const { return fParent; }
+
+   Int_t GetLevel() const;
+
 private:
+
+   AliRsnSysErr *fParent;
 
    ClassDef(AliRsnSysErr, 1)
 };
