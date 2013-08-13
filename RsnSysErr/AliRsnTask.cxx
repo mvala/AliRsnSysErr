@@ -72,7 +72,7 @@ void AliRsnTask::Print(Option_t* option) const
    for (Int_t i=0;i<GetLevel();i++) prefix += "  ";
    
    // Printing info
-   Printf("%sname='%s' title='%s' level=%d", prefix.Data(), GetName(), GetTitle(), GetLevel());
+   Printf("%sname='%s' title='%s' level=%d path=%s", prefix.Data(), GetName(), GetTitle(), GetLevel(), GetFullPath().Data());
 
    // Printing info of all subtasks
    TIter next(fTasks);
@@ -94,6 +94,24 @@ Int_t AliRsnTask::GetLevel() const
    }
    return level;
 }
+
+TString AliRsnTask::GetFullPath() const
+{
+
+   // Get current name
+   TString fp = GetName();
+   fp.Prepend("/");
+
+   AliRsnTask *p = GetParent();
+   while (p) {
+      fp.Prepend(p->GetName());
+      fp.Prepend("/");         
+      p = p->GetParent();
+   }
+   
+   return fp;
+}
+
 
 AliRsnTask *AliRsnTask::GetListByPath(TString path) const
 {

@@ -76,7 +76,7 @@ TH1D *AliRsnUtils::Graph2Hist(TGraphErrors *gr, Bool_t useGraphEY, Double_t min)
 
    }
 
-   TH1D *h = new TH1D(TString::Format("%s_hist", gr->GetName()).Data(), "", nBins - 1, bins);
+   TH1D *h = new TH1D(TString::Format("%s", gr->GetName()).Data(), "", nBins - 1, bins);
 
    // FILL values
    for (i = 1; i <= h->GetNbinsX(); ++i) {

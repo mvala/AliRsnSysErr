@@ -18,6 +18,7 @@ void test_sys_err()
    // main->ExecuteTask();
    main->Print();
 
+   return;
    AliRsnSysErr *t = (AliRsnSysErr *) main->GetListByPath("/RsnSysErr/KTPCnsig30_STD2010_PRIMARY_00");
    if (!t) return;
    TH1D *h = t->GetHistogram();
