@@ -27,6 +27,8 @@ public:
    void           SetHistoram(TH1D*h);
    TH1D          *GetHistogram() const { return fHistogram; }
 
+   Bool_t         ImportDirectories(const char *dir, const char *filename="", const char *tmpl="%lg %lg %lg %lg");
+
 private:
 
    TH1D* fHistogram;

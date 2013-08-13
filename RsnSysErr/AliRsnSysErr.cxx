@@ -9,6 +9,8 @@
 
 #include <TSystem.h>
 #include <TError.h>
+#include <TObjArray.h>
+#include <TObjString.h>
 #include <TH1.h>
 #include <TGraphErrors.h>
 
@@ -71,9 +73,11 @@ TH1D *AliRsnSysErr::CreateHistogram(const char *path, const char *tmpl)
    TString fullPath = gSystem->ExpandPathName(path);
    TGraphErrors *gr = new TGraphErrors(fullPath.Data(), tmpl);
    if (!gr) {
-      ::Error("AliRsnSysErr::CreateHistogram", "Error opening graph from %s !!!",fullPath.Data());
+      ::Error("AliRsnSysErr::CreateHistogram", TString::Format("Error opening graph from %s !!!", fullPath.Data()).Data());
       return 0;
    }
+
+   gr->SetName(TString::Format("%s_hist", GetName()).Data());
 
    TH1D *h = AliRsnUtils::Graph2Hist(gr, kFALSE, 0.0);
 
@@ -91,6 +95,50 @@ void AliRsnSysErr::SetHistoram(TH1D *h)
    SafeDelete(fHistogram);
    fHistogram = h;
 }
+
+Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, const char *tmpl)
+{
+   TString fullPath = gSystem->ExpandPathName(dir);
+
+   if (gSystem->AccessPathName(fullPath)) {
+      ::Error("AliRsnSysErr::ImportDirectories", TString::Format("Directory %s doesn't exist !!!", fullPath.Data()).Data());
+      return kFALSE;
+   }
+   
+   TString out = gSystem->GetFromPipe(TString::Format("ls -1 %s", fullPath.Data()).Data());
+   if (out.IsNull()) {
+      ::Error("AliRsnSysErr::ImportDirectories",
+              TString::Format("No files or directories found in '%s' !!!", dir).Data());
+      return kFALSE;
+   }
+
+   
+   TObjArray *t = out.Tokenize("\n");
+   TObjString *so;
+   TString s, curPath, tmpPath;
+   TIter next(t);
+   AliRsnSysErr *se;
+   while ((so = (TObjString *) next())) {
+      s = so->GetString();
+      curPath = fullPath+"/"+s;
+      if (!gSystem->Exec(TString::Format("[ -f %s ]", curPath.Data()).Data())) {
+         // if we have file
+         tmpPath = TString::Format("%s/%s",fullPath.Data(), filename).Data();
+         if (!curPath.CompareTo(tmpPath.Data()))
+            CreateHistogram(curPath.Data(),tmpl);
+      } else {
+         // if we have directory or link
+         se = new AliRsnSysErr(s.Data(),s.Data());
+         if (se) {
+            Add(se);
+            se->ImportDirectories(curPath.Data(), filename, tmpl);
+         }
+      }
+   }
+
+   return kTRUE;
+}
+
 
 void AliRsnSysErr::Exec(Option_t *option)
 {

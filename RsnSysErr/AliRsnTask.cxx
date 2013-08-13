@@ -99,7 +99,8 @@ AliRsnTask *AliRsnTask::GetListByPath(TString path) const
 {
 
    // let's remove first '/'
-   path.Remove(0,path.First('/')+1);
+   TString name = GetName();
+   path.Remove(0,name.Length()+path.First('/')+2);
 
    // let's remove lats '/' 
    if (path.Last('/') == path.Length())
