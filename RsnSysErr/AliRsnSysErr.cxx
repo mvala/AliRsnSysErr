@@ -7,6 +7,8 @@
 //          Jan Musinsky (jan.musinsky@cern.ch)
 //
 
+#include <TSystem.h>
+#include <TError.h>
 #include <TH1.h>
 #include <TGraphErrors.h>
 
@@ -63,21 +65,30 @@ AliRsnSysErr::~AliRsnSysErr()
 }
 
 
-TH1D *AliRsnSysErr::CreateHistoram(const char *path, const char *tmpl) {
-
-   TGraphErrors *gr = new TGraphErrors(path, tmpl);
-   if (!gr) return 0;
+TH1D *AliRsnSysErr::CreateHistogram(const char *path, const char *tmpl)
+{
+   // expanding path so we can use ~, $HOME, ...
+   TString fullPath = gSystem->ExpandPathName(path);
+   TGraphErrors *gr = new TGraphErrors(fullPath.Data(), tmpl);
+   if (!gr) {
+      ::Error("AliRsnSysErr::CreateHistogram", "Error opening graph from %s !!!",fullPath.Data());
+      return 0;
+   }
 
    TH1D *h = AliRsnUtils::Graph2Hist(gr, kFALSE, 0.0);
 
-   delete gr;
+   // removing tmp graph
+   SafeDelete(gr);
+
+   // setting current histogram to fHistogram
+   SetHistoram(h);
 
    return h;
 }
 
-void AliRsnSysErr::SetHistoram(TH1D*h)  
-{ 
-   delete fHistogram; 
+void AliRsnSysErr::SetHistoram(TH1D *h)
+{
+   SafeDelete(fHistogram);
    fHistogram = h;
 }
 

@@ -11,7 +11,9 @@
 #define ALIRSNSYSERR_H
 
 #include "AliRsnTask.h"
+
 class TH1D;
+
 class AliRsnSysErr : public AliRsnTask {
 public:
    AliRsnSysErr(const char *name="rse", const char*title="");
@@ -21,7 +23,7 @@ public:
 
    virtual void	Exec(Option_t* option);
 
-   TH1D          *CreateHistoram(const char *path, const char *tmpl);
+   TH1D          *CreateHistogram(const char *path, const char *tmpl="%lg %lg %lg %lg");
    void           SetHistoram(TH1D*h);
    TH1D          *GetHistogram() const { return fHistogram; }
 
