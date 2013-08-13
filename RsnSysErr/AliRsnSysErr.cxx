@@ -82,7 +82,7 @@ void AliRsnSysErr::Browse(TBrowser *b)
 }
 
 
-TH1D *AliRsnSysErr::CreateHistogram(const char *path, const char *tmpl, const char *postfix)
+TH1D *AliRsnSysErr::CreateHistogramFromGraph(const char *path, const char *tmpl, const char *postfix)
 {
    // expanding path so we can use ~, $HOME, ...
    TString fullPath = gSystem->ExpandPathName(path);
@@ -151,7 +151,7 @@ Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, co
       return kFALSE;
    }
 
-   
+   Bool_t rc;
    TObjArray *t = out.Tokenize("\n");
    TObjString *so;
    TString s, curPath, tmpPath;
@@ -163,14 +163,17 @@ Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, co
       if (!gSystem->Exec(TString::Format("[ -f %s ]", curPath.Data()).Data())) {
          // if we have file
          tmpPath = TString::Format("%s/%s",fullPath.Data(), filename).Data();
-         if (!curPath.CompareTo(tmpPath.Data()))
-            CreateHistogram(curPath.Data(),tmpl);
+         if (!curPath.CompareTo(tmpPath.Data())){
+            TH1D *h = CreateHistogramFromGraph(curPath.Data(),tmpl);
+            if (!h) return kFALSE;
+         }
       } else {
          // if we have directory or link
          se = new AliRsnSysErr(s.Data(),s.Data());
          if (se) {
             Add(se);
-            se->ImportDirectories(curPath.Data(), filename, tmpl);
+            rc = se->ImportDirectories(curPath.Data(), filename, tmpl);
+            if (!rc) return kFALSE;
          }
       }
    }

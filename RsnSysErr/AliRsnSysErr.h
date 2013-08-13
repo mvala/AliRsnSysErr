@@ -24,7 +24,7 @@ public:
    void           Browse(TBrowser *b);
    virtual void	Exec(Option_t* option);
 
-   TH1D          *CreateHistogram(const char *path, const char *tmpl="%lg %lg %lg %lg", const char *postfix="orig");
+   TH1D          *CreateHistogramFromGraph(const char *path, const char *tmpl="%lg %lg %lg %lg", const char *postfix="orig");
    void           AddHistogramToList(TH1D*h, const char *postfix="orig");
    TH1D          *GetHistogram(const char *postfix="orig");
 
