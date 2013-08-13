@@ -1,8 +1,11 @@
 set(MODULE RsnSysErr)
 
 set(SRCS
+AliRsnUtils.cxx
 AliRsnTask.cxx
 AliRsnSysErr.cxx
+TGraphRsnErrors.cxx
+AliRsnSysErrViewer.cxx
 )
 
 set(INCLUDE_DIRECTORIES

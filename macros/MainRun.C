@@ -5,6 +5,7 @@
 
 void MainRun(TString macro, TString macro_argc, TString projectDir = "") {
 
+   gSystem->Load("libGui.so");
    gSystem->Load("libRsnSysErr.so");
 
    gSystem->AddIncludePath(TString::Format("-I%sRsnSysErr", projectDir.Data()).Data());
