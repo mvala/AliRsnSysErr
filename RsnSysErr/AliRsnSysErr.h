@@ -21,6 +21,7 @@ public:
    AliRsnSysErr &operator=(const AliRsnSysErr &copy);
    virtual ~AliRsnSysErr();
 
+   void           Browse(TBrowser *b);
    virtual void	Exec(Option_t* option);
 
    TH1D          *CreateHistogram(const char *path, const char *tmpl="%lg %lg %lg %lg");

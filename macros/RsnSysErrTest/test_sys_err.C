@@ -13,6 +13,7 @@ void test_sys_err()
    AliRsnSysErr *main = new AliRsnSysErr("RsnSysErr","Root of RsnSysErr");
    // main->CreateHistogram("~/ALICE/RSN_OUT/2013-08-16/OUT/TPC30/0/KTPCnsig30_STD2010_PRIMARY_00/RFE","%lg %lg %lg %lg");
 
+   // main->ImportDirectories("~/ALICE/RSN_OUT/2013-08-16/OUT/TPC30/0/","R");
    main->ImportDirectories("~/ALICE/RSN_OUT/2013-08-16/OUT/TPC30/0/","RFE");
 
    // main->ExecuteTask();

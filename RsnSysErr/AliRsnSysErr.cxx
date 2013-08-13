@@ -13,6 +13,7 @@
 #include <TObjString.h>
 #include <TH1.h>
 #include <TGraphErrors.h>
+#include <TBrowser.h>
 
 #include "AliRsnUtils.h"
 #include "AliRsnSysErr.h"
@@ -66,6 +67,18 @@ AliRsnSysErr::~AliRsnSysErr()
 
 }
 
+void AliRsnSysErr::Browse(TBrowser *b)
+{
+   // Browse the list of tasks.
+   // It is recommended to add the top level task to the list of
+   // ROOT browsables by:
+   //    gROOT->GetListOfBrowsables()->Add(myTopLevelTask)
+
+   if (fTasks) fTasks->Browse(b);
+   if (fHistogram) b->Add(fHistogram);
+   
+}
+
 
 TH1D *AliRsnSysErr::CreateHistogram(const char *path, const char *tmpl)
 {
@@ -77,7 +90,10 @@ TH1D *AliRsnSysErr::CreateHistogram(const char *path, const char *tmpl)
       return 0;
    }
 
-   gr->SetName(TString::Format("%s_hist", GetName()).Data());
+   TString name = GetFullPath();
+   name.ReplaceAll("/","_");
+   name.Remove(0,1);
+   gr->SetName(TString::Format("%s_hist", name.Data()).Data());
 
    TH1D *h = AliRsnUtils::Graph2Hist(gr, kFALSE, 0.0);
 
