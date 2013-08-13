@@ -95,20 +95,22 @@ Int_t AliRsnTask::GetLevel() const
    return level;
 }
 
-TString AliRsnTask::GetFullPath() const
+TString AliRsnTask::GetFullPath(TString delim, Bool_t removeFirstChar) const
 {
 
    // Get current name
    TString fp = GetName();
-   fp.Prepend("/");
+   fp.Prepend(delim.Data());
 
    AliRsnTask *p = GetParent();
    while (p) {
       fp.Prepend(p->GetName());
-      fp.Prepend("/");         
+      fp.Prepend(delim.Data());         
       p = p->GetParent();
    }
-   
+
+   if (removeFirstChar) fp.Remove(0,1);
+
    return fp;
 }
 

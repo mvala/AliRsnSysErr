@@ -12,6 +12,7 @@
 #include <TObjArray.h>
 #include <TObjString.h>
 #include <TH1.h>
+#include <TList.h>
 #include <TGraphErrors.h>
 #include <TBrowser.h>
 
@@ -22,8 +23,7 @@ ClassImp(AliRsnSysErr)
 
 //__________________________________________________________________________________________________
 AliRsnSysErr::AliRsnSysErr(const char *name, const char *title) : AliRsnTask(name, title),
-   fHistogram(0)
-
+   fList(0)
 {
 //
 // Defauult constructor
@@ -33,7 +33,7 @@ AliRsnSysErr::AliRsnSysErr(const char *name, const char *title) : AliRsnTask(nam
 
 //__________________________________________________________________________________________________
 AliRsnSysErr::AliRsnSysErr(const AliRsnSysErr &copy) : AliRsnTask(copy),
-   fHistogram(copy.fHistogram)
+   fList(copy.fList)
 {
 //
 // Copy constructor
@@ -52,7 +52,7 @@ AliRsnSysErr &AliRsnSysErr::operator=(const AliRsnSysErr &copy)
    if (this == &copy)
       return *this;
 
-   fHistogram = copy.fHistogram;
+   fList = copy.fList;
 
    return (*this);
 }
@@ -62,8 +62,9 @@ AliRsnSysErr::~AliRsnSysErr()
 //
 // Destructor
 //
-
-   SafeDelete(fHistogram);
+   
+   // fList->Delete();
+   // SafeDelete(fList);
 
 }
 
@@ -75,12 +76,13 @@ void AliRsnSysErr::Browse(TBrowser *b)
    //    gROOT->GetListOfBrowsables()->Add(myTopLevelTask)
 
    if (fTasks) fTasks->Browse(b);
-   if (fHistogram) b->Add(fHistogram);
+   if (fList) b->Add(fList);
+   // if (fHistogram) b->Add(fHistogram);
    
 }
 
 
-TH1D *AliRsnSysErr::CreateHistogram(const char *path, const char *tmpl)
+TH1D *AliRsnSysErr::CreateHistogram(const char *path, const char *tmpl, const char *postfix)
 {
    // expanding path so we can use ~, $HOME, ...
    TString fullPath = gSystem->ExpandPathName(path);
@@ -90,10 +92,7 @@ TH1D *AliRsnSysErr::CreateHistogram(const char *path, const char *tmpl)
       return 0;
    }
 
-   TString name = GetFullPath();
-   name.ReplaceAll("/","_");
-   name.Remove(0,1);
-   gr->SetName(TString::Format("%s_hist", name.Data()).Data());
+   gr->SetName(TString::Format("%s_%s", GetFullPath("_", kTRUE).Data(), postfix).Data());
 
    TH1D *h = AliRsnUtils::Graph2Hist(gr, kFALSE, 0.0);
 
@@ -101,16 +100,40 @@ TH1D *AliRsnSysErr::CreateHistogram(const char *path, const char *tmpl)
    SafeDelete(gr);
 
    // setting current histogram to fHistogram
-   SetHistoram(h);
+   AddHistogramToList(h,postfix);
 
    return h;
 }
 
-void AliRsnSysErr::SetHistoram(TH1D *h)
+void AliRsnSysErr::AddHistogramToList(TH1D *h, const char *postfix) 
 {
-   SafeDelete(fHistogram);
-   fHistogram = h;
+   if (!h) return;
+
+   TH1D *hOld = 0;
+   if (fList) {
+      hOld = GetHistogram(postfix);
+      if (hOld) {
+         fList->Remove(hOld);
+         SafeDelete(hOld);
+      }
+   }
+
+   if (!fList) {
+      fList = new TList();
+      fList->SetName("Histos");
+   }
+   fList->Add(h);
+   
 }
+
+TH1D *AliRsnSysErr::GetHistogram(const char *postfix) 
+{
+
+   if (!fList || !fList->GetEntries()) return 0;
+
+   return (TH1D *)fList->FindObject(TString::Format("%s_%s",GetFullPath("_", kTRUE).Data(),postfix).Data());
+}
+
 
 Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, const char *tmpl)
 {

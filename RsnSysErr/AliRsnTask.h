@@ -27,7 +27,7 @@ public:
    void           SetParent(AliRsnTask *se) { fParent = se; }
    AliRsnTask    *GetParent() const { return fParent; }
    Int_t          GetLevel() const;
-   TString        GetFullPath() const;
+   TString        GetFullPath(TString delim="/", Bool_t removeFirstChar = kFALSE) const;
    AliRsnTask    *GetListByPath(TString path="/") const;
 
 private:

@@ -24,15 +24,15 @@ public:
    void           Browse(TBrowser *b);
    virtual void	Exec(Option_t* option);
 
-   TH1D          *CreateHistogram(const char *path, const char *tmpl="%lg %lg %lg %lg");
-   void           SetHistoram(TH1D*h);
-   TH1D          *GetHistogram() const { return fHistogram; }
+   TH1D          *CreateHistogram(const char *path, const char *tmpl="%lg %lg %lg %lg", const char *postfix="orig");
+   void           AddHistogramToList(TH1D*h, const char *postfix="orig");
+   TH1D          *GetHistogram(const char *postfix="orig");
 
    Bool_t         ImportDirectories(const char *dir, const char *filename="", const char *tmpl="%lg %lg %lg %lg");
 
 private:
 
-   TH1D* fHistogram;
+   TList *fList;
 
    ClassDef(AliRsnSysErr, 1)
 };
