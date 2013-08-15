@@ -19,7 +19,7 @@ class AliRsnSysErr : public AliRsnTask
 {
 public:
    enum EType { kValues=0, kOverBin, kOverMethods, kNTypes };
-   enum EAction { kMean=0, kMax, kMaxDev, kNActions };
+   enum EActionType { kMean=0, kMax, kMaxDev, kNActions };
 
    AliRsnSysErr(const char *name="rse", const char *title="");
    AliRsnSysErr(const AliRsnSysErr &copy);
@@ -35,13 +35,15 @@ public:
 
    Bool_t         ImportDirectories(const char *dir, const char *filename="", const char *tmpl="%lg %lg %lg %lg");
    
-   Bool_t         SetLevelAction(Int_t level, EType type, TBits *actions);
+   void           SetType(EType t) { fType = t; }
+   void           SetActionType(EActionType t) { fActionType = t; }
+   Bool_t         SetLevelAction(Int_t level, EType type, EActionType action);
 
 private:
 
-   TList         *fList;      // list of histograms
-   EType          fType;      // type of output
-   TBits         *fActions;   // list actions
+   TList         *fList;        // list of histograms
+   EType          fType;        // type of output
+   EActionType    fActionType;  // type of action
 
    ClassDef(AliRsnSysErr, 1)
 };

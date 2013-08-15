@@ -25,12 +25,12 @@ ClassImp(AliRsnSysErr)
 AliRsnSysErr::AliRsnSysErr(const char *name, const char *title) : AliRsnTask(name, title),
    fList(0),
    fType(kValues),
-   fActions(0)
+   fActionType(kMean)
 {
    //
    // Defauult constructor
    //
-   
+
    // We need that current task is executed after sub-tasks
    fExecTaskBefore = kFALSE;
 }
@@ -39,7 +39,7 @@ AliRsnSysErr::AliRsnSysErr(const char *name, const char *title) : AliRsnTask(nam
 AliRsnSysErr::AliRsnSysErr(const AliRsnSysErr &copy) : AliRsnTask(copy),
    fList(copy.fList),
    fType(copy.fType),
-   fActions(copy.fActions)
+   fActionType(copy.fActionType)
 {
    //
    // Copy constructor
@@ -60,7 +60,7 @@ AliRsnSysErr &AliRsnSysErr::operator=(const AliRsnSysErr &copy)
 
    fList = copy.fList;
    fType = copy.fType;
-   fActions = copy.fActions;
+   fActionType = copy.fActionType;
 
    return (*this);
 }
@@ -96,7 +96,7 @@ TH1D *AliRsnSysErr::CreateHistogramFromGraph(const char *path, const char *tmpl,
    //
    // CreateHistogramFromGraph
    //
-   
+
    // expanding path so we can use ~, $HOME, ...
    TString fullPath = gSystem->ExpandPathName(path);
    TGraphErrors *gr = new TGraphErrors(fullPath.Data(), tmpl);
@@ -124,7 +124,7 @@ void AliRsnSysErr::AddHistogramToList(TH1D *h, const char *postfix)
    //
    // AddHistogramToList
    //
-   
+
    if (!h) return;
 
    TH1D *hOld = 0;
@@ -163,7 +163,7 @@ Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, co
    //
    // ImportDirectories
    //
-   
+
    TString fullPath = gSystem->ExpandPathName(dir);
 
    if (gSystem->AccessPathName(fullPath)) {
@@ -210,39 +210,54 @@ Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, co
 
 
 //______________________________________________________________________________
+Bool_t AliRsnSysErr::SetLevelAction(Int_t level, AliRsnSysErr::EType type, EActionType actionType)
+{
+   //
+   // SetLevelAction
+   //
+
+//    if (fParent) {
+//       ::Error("AliRsnSysErr::SetLevelAction", "You can set actions on main AliRsnSysErr (with level 0) !!!");
+//       return kFALSE;
+//    }
+
+   if (type<0 || type>=kNTypes) {
+      ::Error("AliRsnSysErr::SetLevelAction", "Wrong type !!!");
+      return kFALSE;
+   }
+
+   if (actionType<0 || actionType>=kNActions) {
+      ::Error("AliRsnSysErr::SetLevelAction", "Wrong action type !!!");
+      return kFALSE;
+   }
+
+
+   TIter next(fTasks);
+   AliRsnSysErr *se;
+   Int_t l=0;
+   while ((se = (AliRsnSysErr*)next())) {
+      if (se->GetLevel() == level) {
+         se->SetType(type);
+         se->SetActionType(actionType);
+      } else {
+         se->SetLevelAction(level, type, actionType);
+      }
+   }
+
+   return kTRUE;
+}
+
+//______________________________________________________________________________
 void AliRsnSysErr::Exec(Option_t *option)
 {
    //
    // Exec
    //
-   Printf("Executing: %s level=%d", GetName(), GetLevel());
+//    Printf("Executing: %s level=%d", GetName(), GetLevel());
+//    if (fList) {
+//       Printf("fList=%d",fList->GetEntries());
+//       fList->Print();
+//    }
+   Printf("type=%d action=%d", fType, fActionType);
 
-}
-
-//______________________________________________________________________________
-Bool_t AliRsnSysErr::SetLevelAction(Int_t level, AliRsnSysErr::EType type, TBits *actions)
-{
-   //
-   // SetLevelAction
-   //
-   
-   if (fParent) {
-      ::Error("AliRsnSysErr::SetLevelAction", "You can set actions on main AliRsnSysErr (with level 0) !!!");
-      return kFALSE;
-   }
-   
-   if (type<0 || type>=kNTypes) {
-      ::Error("AliRsnSysErr::SetLevelAction", "Wrong type !!!");
-      return kFALSE;
-   }
-   
-   if (!actions) {
-      ::Error("AliRsnSysErr::SetLevelAction", "'actions' is null !!!");
-      return kFALSE;
-   }
-   
-   fType = type;
-   fActions = actions;
-   
-   return kTRUE;
 }

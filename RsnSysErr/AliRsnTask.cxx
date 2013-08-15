@@ -91,8 +91,13 @@ void AliRsnTask::Print(Option_t *option) const
    }
 }
 
+//______________________________________________________________________________
 Int_t AliRsnTask::GetLevel() const
 {
+   //
+   // Calculate level
+   //
+   
    if (!fParent) return 0;
 
    Int_t level=0;
@@ -107,6 +112,9 @@ Int_t AliRsnTask::GetLevel() const
 //______________________________________________________________________________
 TString AliRsnTask::GetFullPath(TString delim, Bool_t removeFirstChar) const
 {
+   //
+   // Gets Fult path to current task
+   //
 
    // Get current name
    TString fp = GetName();
