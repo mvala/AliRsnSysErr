@@ -1,0 +1,2 @@
+@ROOTSYS@/include
+@CMAKE_SOURCE_DIR@/RsnSysErr

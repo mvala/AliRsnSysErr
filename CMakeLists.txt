@@ -8,6 +8,8 @@ set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 find_package(ROOT REQUIRED)
+include(kdevelop-utils)
+KDevelopSettings()
 
 add_subdirectory(RsnSysErr)
 
