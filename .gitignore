@@ -16,6 +16,7 @@ build
 tmp
 *.kdev4
 */.kdev4
+*.kdev_include_paths
 
 # emacs ide
 .emacs.desktop
