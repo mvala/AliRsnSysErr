@@ -19,11 +19,9 @@ void test_sys_err()
    // main->ExecuteTask();
    main->Print();
 
-
    TFile *f = TFile::Open("rsn_out_test_sys_err.root","RECREATE");
    main->Write();
    f->Close();
-
 
    return;
    AliRsnSysErr *t = (AliRsnSysErr *) main->GetListByPath("/RsnSysErr/KTPCnsig30_STD2010_PRIMARY_00");

@@ -10,6 +10,7 @@
 #ifndef ALIRSNSYSERR_H
 #define ALIRSNSYSERR_H
 
+#include <TBits.h>
 #include "AliRsnTask.h"
 
 class TH1D;
@@ -17,6 +18,9 @@ class TH1D;
 class AliRsnSysErr : public AliRsnTask
 {
 public:
+   enum EType { kValues=0, kOverBin, kOverMethods, kNTypes };
+   enum EAction { kMean=0, kMax, kMaxDev, kNActions };
+
    AliRsnSysErr(const char *name="rse", const char *title="");
    AliRsnSysErr(const AliRsnSysErr &copy);
    AliRsnSysErr &operator=(const AliRsnSysErr &copy);
@@ -30,10 +34,14 @@ public:
    TH1D          *GetHistogram(const char *postfix="orig");
 
    Bool_t         ImportDirectories(const char *dir, const char *filename="", const char *tmpl="%lg %lg %lg %lg");
+   
+   Bool_t         SetLevelAction(Int_t level, EType type, TBits *actions);
 
 private:
 
-   TList *fList;
+   TList         *fList;      // list of histograms
+   EType          fType;      // type of output
+   TBits         *fActions;   // list actions
 
    ClassDef(AliRsnSysErr, 1)
 };

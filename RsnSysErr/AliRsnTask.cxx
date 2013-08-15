@@ -7,13 +7,17 @@
 //          Jan Musinsky (jan.musinsky@cern.ch)
 //
 
+#include <TROOT.h>
+#include <TString.h>
+
 #include "AliRsnTask.h"
 
 ClassImp(AliRsnTask)
 
-//__________________________________________________________________________________________________
+//______________________________________________________________________________
 AliRsnTask::AliRsnTask(const char *name, const char *title) : TTask(name, title),
-   fParent(0)
+   fParent(0),
+   fExecTaskBefore(kTRUE)
 {
 //
 // Defauult constructor
@@ -21,9 +25,11 @@ AliRsnTask::AliRsnTask(const char *name, const char *title) : TTask(name, title)
 
 }
 
-//__________________________________________________________________________________________________
+//______________________________________________________________________________
 AliRsnTask::AliRsnTask(const AliRsnTask &copy) : TTask(copy),
-   fParent(copy.fParent)
+   fParent(copy.fParent),
+   fExecTaskBefore(copy.fExecTaskBefore)
+
 {
 //
 // Copy constructor
@@ -31,7 +37,7 @@ AliRsnTask::AliRsnTask(const AliRsnTask &copy) : TTask(copy),
 
 }
 
-//__________________________________________________________________________________________________
+//______________________________________________________________________________
 AliRsnTask &AliRsnTask::operator=(const AliRsnTask &copy)
 {
 //
@@ -43,10 +49,12 @@ AliRsnTask &AliRsnTask::operator=(const AliRsnTask &copy)
       return *this;
 
    fParent = copy.fParent;
+   fExecTaskBefore = copy.fExecTaskBefore;
 
    return (*this);
 }
 
+//______________________________________________________________________________
 AliRsnTask::~AliRsnTask()
 {
 //
@@ -55,7 +63,7 @@ AliRsnTask::~AliRsnTask()
 
 }
 
-
+//______________________________________________________________________________
 void AliRsnTask::Add(TTask *task)
 {
    TTask::Add(task);
@@ -64,6 +72,7 @@ void AliRsnTask::Add(TTask *task)
    if (se) se->SetParent(this);
 }
 
+//______________________________________________________________________________
 void AliRsnTask::Print(Option_t *option) const
 {
 
@@ -95,6 +104,7 @@ Int_t AliRsnTask::GetLevel() const
    return level;
 }
 
+//______________________________________________________________________________
 TString AliRsnTask::GetFullPath(TString delim, Bool_t removeFirstChar) const
 {
 
@@ -115,6 +125,7 @@ TString AliRsnTask::GetFullPath(TString delim, Bool_t removeFirstChar) const
 }
 
 
+//__________________________________________________________________________________________________
 AliRsnTask *AliRsnTask::GetListByPath(TString path) const
 {
 
@@ -149,4 +160,42 @@ AliRsnTask *AliRsnTask::GetListByPath(TString path) const
 
    // if yes, let's continue searching
    return t->GetListByPath(path);
+}
+
+//______________________________________________________________________________
+void AliRsnTask::ExecuteTask(Option_t *option)
+{
+   // Execute main task and its subtasks.
+   // When calling this function, the Exec function of the corresponding class
+   // is invoked, then the list of its subtasks is executed calling recursively
+   // all the subtasks, etc.
+   //
+   // The option parameter may be used to select different execution steps
+   // within a task. This parameter is passed also to all the subtasks.
+
+   if (fgBeginTask) {
+      Error("ExecuteTask","Cannot execute task:%s, already running task: %s",GetName(),fgBeginTask->GetName());
+      return;
+   }
+   if (!IsActive()) return;
+
+   fOption = option;
+   fgBeginTask = this;
+   fgBreakPoint = 0;
+
+   if (fBreakin) return;
+
+   if (fExecTaskBefore) Exec(option);
+
+   fHasExecuted = kTRUE;
+   ExecuteTasks(option);
+
+   if (!fExecTaskBefore) Exec(option);
+
+   if (fBreakout) return;
+
+   if (!fgBreakPoint) {
+      fgBeginTask->CleanTasks();
+      fgBeginTask = 0;
+   }
 }

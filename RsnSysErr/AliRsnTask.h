@@ -24,6 +24,7 @@ public:
    virtual void   Add(TTask *task);
    virtual void   Add(AliRsnTask *se) { Add((TTask *)se); }
    virtual void   Print(Option_t *option = "") const;
+   virtual void   ExecuteTask(Option_t *option="");
 
    void           SetParent(AliRsnTask *se) { fParent = se; }
    AliRsnTask    *GetParent() const { return fParent; }
@@ -31,9 +32,10 @@ public:
    TString        GetFullPath(TString delim="/", Bool_t removeFirstChar = kFALSE) const;
    AliRsnTask    *GetListByPath(TString path="/") const;
 
-private:
+protected:
 
    AliRsnTask *fParent;
+   Bool_t      fExecTaskBefore;
 
    ClassDef(AliRsnTask, 1)
 };

@@ -23,17 +23,23 @@ ClassImp(AliRsnSysErr)
 
 //__________________________________________________________________________________________________
 AliRsnSysErr::AliRsnSysErr(const char *name, const char *title) : AliRsnTask(name, title),
-   fList(0)
+   fList(0),
+   fType(kValues),
+   fActions(0)
 {
 //
 // Defauult constructor
 //
-
+   
+   // We need that current task is executed after sub-tasks
+   fExecTaskBefore = kFALSE;
 }
 
 //__________________________________________________________________________________________________
 AliRsnSysErr::AliRsnSysErr(const AliRsnSysErr &copy) : AliRsnTask(copy),
-   fList(copy.fList)
+   fList(copy.fList),
+   fType(copy.fType),
+   fActions(copy.fActions)
 {
 //
 // Copy constructor
@@ -53,6 +59,8 @@ AliRsnSysErr &AliRsnSysErr::operator=(const AliRsnSysErr &copy)
       return *this;
 
    fList = copy.fList;
+   fType = copy.fType;
+   fActions = copy.fActions;
 
    return (*this);
 }
@@ -186,4 +194,27 @@ void AliRsnSysErr::Exec(Option_t *option)
 {
    Printf("Executing: %s level=%d", GetName(), GetLevel());
 
+}
+
+Bool_t AliRsnSysErr::SetLevelAction(Int_t level, AliRsnSysErr::EType type, TBits *actions)
+{
+   if (fParent) {
+      ::Error("AliRsnSysErr::SetLevelAction", "You can set actions on main AliRsnSysErr (with level 0) !!!");
+      return kFALSE;
+   }
+   
+   if (type<0 || type>=kNTypes) {
+      ::Error("AliRsnSysErr::SetLevelAction", "Wrong type !!!");
+      return kFALSE;
+   }
+   
+   if (!actions) {
+      ::Error("AliRsnSysErr::SetLevelAction", "'actions' is null !!!");
+      return kFALSE;
+   }
+   
+   fType = type;
+   fActions = actions;
+   
+   return kTRUE;
 }
