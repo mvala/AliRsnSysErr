@@ -13,16 +13,17 @@
 #include <TTask.h>
 
 class TList;
-class AliRsnTask : public TTask {
+class AliRsnTask : public TTask
+{
 public:
-   AliRsnTask(const char *name="rsnTask", const char*title="Rsn Task");
+   AliRsnTask(const char *name="rsnTask", const char *title="Rsn Task");
    AliRsnTask(const AliRsnTask &copy);
    AliRsnTask &operator=(const AliRsnTask &copy);
    virtual ~AliRsnTask();
 
-   virtual void	Add(TTask* task);
-   virtual void	Add(AliRsnTask* se) { Add((TTask*)se); }
-   virtual void	Print(Option_t* option = "") const;
+   virtual void   Add(TTask *task);
+   virtual void   Add(AliRsnTask *se) { Add((TTask *)se); }
+   virtual void   Print(Option_t *option = "") const;
 
    void           SetParent(AliRsnTask *se) { fParent = se; }
    AliRsnTask    *GetParent() const { return fParent; }

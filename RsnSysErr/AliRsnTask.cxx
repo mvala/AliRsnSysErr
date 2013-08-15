@@ -59,25 +59,25 @@ AliRsnTask::~AliRsnTask()
 void AliRsnTask::Add(TTask *task)
 {
    TTask::Add(task);
-   
+
    AliRsnTask *se = dynamic_cast<AliRsnTask *> (task);
    if (se) se->SetParent(this);
 }
 
-void AliRsnTask::Print(Option_t* option) const
+void AliRsnTask::Print(Option_t *option) const
 {
-   
+
    // Creating spaces for prefix
    TString prefix;
-   for (Int_t i=0;i<GetLevel();i++) prefix += "  ";
-   
+   for (Int_t i=0; i<GetLevel(); i++) prefix += "  ";
+
    // Printing info
    Printf("%sname='%s' title='%s' level=%d path=%s", prefix.Data(), GetName(), GetTitle(), GetLevel(), GetFullPath().Data());
 
    // Printing info of all subtasks
    TIter next(fTasks);
    AliRsnTask *se;
-   while ((se = (AliRsnTask*) next())) {
+   while ((se = (AliRsnTask *) next())) {
       se->Print();
    }
 }
@@ -105,7 +105,7 @@ TString AliRsnTask::GetFullPath(TString delim, Bool_t removeFirstChar) const
    AliRsnTask *p = GetParent();
    while (p) {
       fp.Prepend(p->GetName());
-      fp.Prepend(delim.Data());         
+      fp.Prepend(delim.Data());
       p = p->GetParent();
    }
 
@@ -122,27 +122,27 @@ AliRsnTask *AliRsnTask::GetListByPath(TString path) const
    TString name = GetName();
    path.Remove(0,name.Length()+path.First('/')+2);
 
-   // let's remove lats '/' 
+   // let's remove lats '/'
    if (path.Last('/') == path.Length())
       path.Remove(path.Length()-1,path.Length());
 
    // if path is null return current object
-   if (path.IsNull()) return (AliRsnTask*)this; 
-   
+   if (path.IsNull()) return (AliRsnTask *)this;
+
    // let's find out current name
    TString curName = path(0,path.First('/'));
 
    // if curName is null, then path is our name
    if (curName.IsNull()) {
       curName=path;
-      return (AliRsnTask*) fTasks->FindObject(curName.Data());
+      return (AliRsnTask *) fTasks->FindObject(curName.Data());
    }
 
    // let's remove current name from path
    path.Remove(0,curName.Length());
 
    // let' see if we have task in fTasks
-   AliRsnTask *t = (AliRsnTask*) fTasks->FindObject(curName.Data());
+   AliRsnTask *t = (AliRsnTask *) fTasks->FindObject(curName.Data());
 
    // if not we return 0
    if (!t) return 0;

@@ -39,5 +39,5 @@ void test_sys_err()
 
    gROOT->GetListOfBrowsables()->Add(main,main->GetName());
 
-   new TBrowser;   
+   new TBrowser;
 }

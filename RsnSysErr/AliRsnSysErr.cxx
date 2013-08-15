@@ -62,7 +62,7 @@ AliRsnSysErr::~AliRsnSysErr()
 //
 // Destructor
 //
-   
+
    // fList->Delete();
    // SafeDelete(fList);
 
@@ -78,7 +78,7 @@ void AliRsnSysErr::Browse(TBrowser *b)
    if (fTasks) fTasks->Browse(b);
    if (fList) b->Add(fList);
    // if (fHistogram) b->Add(fHistogram);
-   
+
 }
 
 
@@ -105,7 +105,7 @@ TH1D *AliRsnSysErr::CreateHistogramFromGraph(const char *path, const char *tmpl,
    return h;
 }
 
-void AliRsnSysErr::AddHistogramToList(TH1D *h, const char *postfix) 
+void AliRsnSysErr::AddHistogramToList(TH1D *h, const char *postfix)
 {
    if (!h) return;
 
@@ -123,10 +123,10 @@ void AliRsnSysErr::AddHistogramToList(TH1D *h, const char *postfix)
       fList->SetName("Histos");
    }
    fList->Add(h);
-   
+
 }
 
-TH1D *AliRsnSysErr::GetHistogram(const char *postfix) 
+TH1D *AliRsnSysErr::GetHistogram(const char *postfix)
 {
 
    if (!fList || !fList->GetEntries()) return 0;
@@ -143,7 +143,7 @@ Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, co
       ::Error("AliRsnSysErr::ImportDirectories", TString::Format("Directory %s doesn't exist !!!", fullPath.Data()).Data());
       return kFALSE;
    }
-   
+
    TString out = gSystem->GetFromPipe(TString::Format("ls -1 %s", fullPath.Data()).Data());
    if (out.IsNull()) {
       ::Error("AliRsnSysErr::ImportDirectories",
@@ -163,7 +163,7 @@ Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, co
       if (!gSystem->Exec(TString::Format("[ -f %s ]", curPath.Data()).Data())) {
          // if we have file
          tmpPath = TString::Format("%s/%s",fullPath.Data(), filename).Data();
-         if (!curPath.CompareTo(tmpPath.Data())){
+         if (!curPath.CompareTo(tmpPath.Data())) {
             TH1D *h = CreateHistogramFromGraph(curPath.Data(),tmpl);
             if (!h) return kFALSE;
          }

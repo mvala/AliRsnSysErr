@@ -22,7 +22,7 @@ void test()
    AliRsnSysErr *t22 = new AliRsnSysErr("t22","Test 2 2");
    t2->Add(t21);
    t2->Add(t22);
-   
+
    main->Add(t1);
    main->Add(t2);
 
@@ -42,5 +42,5 @@ void test()
 
    gROOT->GetListOfBrowsables()->Add(main,main->GetName());
 
-   new TBrowser;   
+   new TBrowser;
 }

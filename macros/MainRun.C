@@ -4,7 +4,8 @@
 #include <TStopwatch.h>
 #endif
 
-void MainRun(TString macro, TString macro_argc, TString projectDir = "") {
+void MainRun(TString macro, TString macro_argc, TString projectDir = "")
+{
 
    gSystem->Load("libGui.so");
    gSystem->Load("libRsnSysErr.so");
@@ -19,10 +20,10 @@ void MainRun(TString macro, TString macro_argc, TString projectDir = "") {
          macro.ReplaceAll(".C","");
          gROOT->ProcessLine(TString::Format("%s(%s)", macro.Data(),macro_argc.Data()).Data());
       }
-   } 
+   }
 
    timer.Stop();
    timer.Print();
-   
+
    Printf("Working dir: '%s'", gSystem->WorkingDirectory());
 }
