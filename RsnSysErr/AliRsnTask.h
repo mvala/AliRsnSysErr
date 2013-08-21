@@ -16,28 +16,34 @@ class TList;
 class AliRsnTask : public TTask
 {
 public:
-   AliRsnTask(const char *name="rsnTask", const char *title="Rsn Task");
-   AliRsnTask(const AliRsnTask &copy);
-   AliRsnTask &operator=(const AliRsnTask &copy);
-   virtual ~AliRsnTask();
+    AliRsnTask(const char *name="rsnTask", const char *title="Rsn Task");
+    AliRsnTask(const AliRsnTask &copy);
+    AliRsnTask &operator=(const AliRsnTask &copy);
+    virtual ~AliRsnTask();
 
-   virtual void   Add(TTask *task);
-   virtual void   Add(AliRsnTask *se) { Add((TTask *)se); }
-   virtual void   Print(Option_t *option = "") const;
-   virtual void   ExecuteTask(Option_t *option="");
+    virtual void   Add(TTask *task);
+    virtual void   Add(AliRsnTask *se) {
+        Add((TTask *)se);
+    }
+    virtual void   Print(Option_t *option = "") const;
+    virtual void   ExecuteTask(Option_t *option="");
 
-   void           SetParent(AliRsnTask *se) { fParent = se; }
-   AliRsnTask    *GetParent() const { return fParent; }
-   Int_t          GetLevel() const;
-   TString        GetFullPath(TString delim="/", Bool_t removeFirstChar = kFALSE) const;
-   AliRsnTask    *GetListByPath(TString path="/") const;
+    void           SetParent(AliRsnTask *se) {
+        fParent = se;
+    }
+    AliRsnTask    *GetParent() const {
+        return fParent;
+    }
+    Int_t          GetLevel() const;
+    TString        GetFullPath(TString delim="/", Bool_t removeFirstChar = kFALSE) const;
+    AliRsnTask    *GetListByPath(TString path="/") const;
 
 protected:
 
-   AliRsnTask *fParent;
-   Bool_t      fExecTaskBefore;
+    AliRsnTask *fParent;
+    Bool_t      fExecTaskBefore;
 
-   ClassDef(AliRsnTask, 1)
+    ClassDef(AliRsnTask, 1)
 };
 
 #endif
