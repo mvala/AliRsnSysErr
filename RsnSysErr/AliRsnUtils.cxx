@@ -4,6 +4,10 @@
 // #endif
 
 #include <TError.h>
+#include <TString.h>
+#include <TMath.h>
+#include <TH1.h>
+#include <TGraphErrors.h>
 #include "AliRsnUtils.h"
 
 //______________________________________________________________________________
@@ -12,7 +16,7 @@ TH1D *AliRsnUtils::Graph2Hist(TGraphErrors *gr, Bool_t useGraphEY, Double_t min)
    //
    // Creating Histogram (TH1D) from TGraphErrors
    //
-   
+
    // we return 0, if no grpah
    if ((!gr) || (!gr->GetN())) {
       ::Error("AliRsnUtils::Graph2Hist", "Graph 'gr' is null or has no points !!!");
@@ -93,4 +97,65 @@ TH1D *AliRsnUtils::Graph2Hist(TGraphErrors *gr, Bool_t useGraphEY, Double_t min)
    delete gr;
 
    return h;
+}
+
+Double_t AliRsnUtils::Min(Double_t *val, Int_t n)
+{
+   Double_t min = (Double_t) kMaxLong64;
+   for(Int_t i=0;i<n;i++) {
+      min =  TMath::Min(val[i],min);
+   }
+   return min;
+}
+
+Double_t AliRsnUtils::Max(Double_t *val, Int_t n)
+{
+   Double_t max = (Double_t) -kMaxLong64;
+   for(Int_t i=0;i<n;i++) {
+      max =  TMath::Max(val[i],max);
+   }
+   return max;
+}
+
+Double_t AliRsnUtils::Average(Double_t * val, Int_t n)
+{
+   return AliRsnUtils::Mean(val, n);
+}
+
+Double_t AliRsnUtils::Mean(Double_t *val, Int_t n, Double_t *binCenters)
+{
+   Double_t sum = 0.0;
+   for(Int_t i=0;i<n;i++) {
+      if (binCenters) sum += val[i]*binCenters[i];
+      else sum += val[i];
+   }
+   return sum/n;
+}
+
+Double_t AliRsnUtils::StdDev(Double_t *val, Int_t n, Double_t *binCenters)
+{
+   Double_t sum = 0.0;
+   Double_t mean = AliRsnUtils::Mean(val, n, binCenters);
+   for(Int_t i=0;i<n;i++) {
+      sum += TMath::Power(val[i]-mean,2);
+   }
+   return TMath::Sqrt(sum)/(n-1);
+}
+
+Double_t AliRsnUtils::MinDev(Double_t *val, Int_t n, Double_t refVal)
+{
+   Double_t min = (Double_t) kMaxLong64;
+   for(Int_t i=0;i<n;i++) {
+      min =  TMath::Min(TMath::Abs(val[i]-refVal),min);
+   }
+   return min;
+}
+
+Double_t AliRsnUtils::MaxDev(Double_t *val, Int_t n, Double_t refVal)
+{
+   Double_t max = (Double_t) -kMaxLong64;
+   for(Int_t i=0;i<n;i++) {
+      max =  TMath::Max(TMath::Abs(val[i]-refVal),max);
+   }
+   return max;
 }

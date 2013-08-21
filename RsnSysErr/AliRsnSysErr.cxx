@@ -12,6 +12,7 @@
 #include <TObjArray.h>
 #include <TObjString.h>
 #include <TH1.h>
+#include <TH2.h>
 #include <TList.h>
 #include <TGraphErrors.h>
 #include <TBrowser.h>
@@ -24,8 +25,10 @@ ClassImp(AliRsnSysErr)
 //______________________________________________________________________________
 AliRsnSysErr::AliRsnSysErr(const char *name, const char *title) : AliRsnTask(name, title),
    fList(0),
-   fType(kValues),
-   fActionType(kMean)
+   fAxisLoop(kY),
+   fActions(0),
+   fInitValue(0.0),
+   fValue(fInitValue)
 {
    //
    // Defauult constructor
@@ -38,8 +41,10 @@ AliRsnSysErr::AliRsnSysErr(const char *name, const char *title) : AliRsnTask(nam
 //______________________________________________________________________________
 AliRsnSysErr::AliRsnSysErr(const AliRsnSysErr &copy) : AliRsnTask(copy),
    fList(copy.fList),
-   fType(copy.fType),
-   fActionType(copy.fActionType)
+   fAxisLoop(copy.fAxisLoop),
+   fActions(copy.fActions),
+   fInitValue(copy.fInitValue),
+   fValue(copy.fValue)
 {
    //
    // Copy constructor
@@ -59,8 +64,10 @@ AliRsnSysErr &AliRsnSysErr::operator=(const AliRsnSysErr &copy)
       return *this;
 
    fList = copy.fList;
-   fType = copy.fType;
-   fActionType = copy.fActionType;
+   fAxisLoop = copy.fAxisLoop;
+   fActions = copy.fActions;
+   fInitValue = copy.fInitValue;
+   fValue = copy.fValue;
 
    return (*this);
 }
@@ -75,9 +82,24 @@ AliRsnSysErr::~AliRsnSysErr()
    // fList->Delete();
    // SafeDelete(fList);
 
+   SafeDelete(fActions);
+
 }
 
 //______________________________________________________________________________
+void AliRsnSysErr::Init()
+{
+   //
+   // Init
+   //
+
+   if (!fList) {
+      fList = new TList();
+      fList->SetName("Histos");
+   }
+}
+
+
 void AliRsnSysErr::Browse(TBrowser *b)
 {
    // Browse the list of tasks.
@@ -136,10 +158,7 @@ void AliRsnSysErr::AddHistogramToList(TH1D *h, const char *postfix)
       }
    }
 
-   if (!fList) {
-      fList = new TList();
-      fList->SetName("Histos");
-   }
+   Init();
    fList->Add(h);
 
 }
@@ -158,7 +177,7 @@ TH1D *AliRsnSysErr::GetHistogram(const char *postfix)
 
 
 //______________________________________________________________________________
-Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, const char *tmpl)
+Bool_t AliRsnSysErr::ImportDirectories(const char *postfix, const char *dir, const char *filename, const char *tmpl)
 {
    //
    // ImportDirectories
@@ -178,6 +197,8 @@ Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, co
       return kFALSE;
    }
 
+   Init();
+
    Bool_t rc;
    TObjArray *t = out.Tokenize("\n");
    TObjString *so;
@@ -191,15 +212,16 @@ Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, co
          // if we have file
          tmpPath = TString::Format("%s/%s",fullPath.Data(), filename).Data();
          if (!curPath.CompareTo(tmpPath.Data())) {
-            TH1D *h = CreateHistogramFromGraph(curPath.Data(),tmpl);
+            TH1D *h = CreateHistogramFromGraph(curPath.Data(),tmpl, postfix);
             if (!h) return kFALSE;
          }
       } else {
          // if we have directory or link
          se = new AliRsnSysErr(s.Data(),s.Data());
          if (se) {
+            se->Init();
             Add(se);
-            rc = se->ImportDirectories(curPath.Data(), filename, tmpl);
+            rc = se->ImportDirectories(postfix, curPath.Data(), filename, tmpl);
             if (!rc) return kFALSE;
          }
       }
@@ -208,9 +230,8 @@ Bool_t AliRsnSysErr::ImportDirectories(const char *dir, const char *filename, co
    return kTRUE;
 }
 
-
 //______________________________________________________________________________
-Bool_t AliRsnSysErr::SetLevelAction(Int_t level, AliRsnSysErr::EType type, EActionType actionType)
+Bool_t AliRsnSysErr::SetLevelAction(Int_t level, TArrayI *actions, AliRsnSysErr::ELoopAxis axisLoop, Double_t initVal)
 {
    //
    // SetLevelAction
@@ -221,26 +242,33 @@ Bool_t AliRsnSysErr::SetLevelAction(Int_t level, AliRsnSysErr::EType type, EActi
 //       return kFALSE;
 //    }
 
-   if (type<0 || type>=kNTypes) {
-      ::Error("AliRsnSysErr::SetLevelAction", "Wrong type !!!");
+   if (axisLoop<0 || axisLoop>=kNLoopAxis) {
+      ::Error("AliRsnSysErr::SetLevelAction", "Wrong EAxisLoop type !!!");
       return kFALSE;
    }
 
-   if (actionType<0 || actionType>=kNActions) {
-      ::Error("AliRsnSysErr::SetLevelAction", "Wrong action type !!!");
+   if (!actions) {
+      ::Error("AliRsnSysErr::SetLevelAction", "TArrayI 'actions' is null !!!");
       return kFALSE;
    }
 
+   if (!level) {
+      SetAxisLoopType(axisLoop);
+      SetActions(actions);
+      SetInitValue(initVal);
+      return kTRUE;
+   }
 
    TIter next(fTasks);
    AliRsnSysErr *se;
    Int_t l=0;
-   while ((se = (AliRsnSysErr*)next())) {
+   while ((se = (AliRsnSysErr *)next())) {
       if (se->GetLevel() == level) {
-         se->SetType(type);
-         se->SetActionType(actionType);
+         se->SetAxisLoopType(axisLoop);
+         se->SetActions(actions);
+         se->SetInitValue(initVal);
       } else {
-         se->SetLevelAction(level, type, actionType);
+         if (!se->SetLevelAction(level, actions, axisLoop, initVal)) return kFALSE;
       }
    }
 
@@ -258,6 +286,128 @@ void AliRsnSysErr::Exec(Option_t *option)
 //       Printf("fList=%d",fList->GetEntries());
 //       fList->Print();
 //    }
-   Printf("type=%d action=%d", fType, fActionType);
 
+   const char *nameTmp="pt";
+
+   // if there is no action we return
+   if (!fActions) return;
+
+   if (!fTasks || fTasks->GetEntries()<=0) return;
+
+   AliRsnSysErr *se = (AliRsnSysErr *) fTasks->At(0);
+
+   TH1D *h = se->GetHistogram(nameTmp);
+   if (!h) return;
+   Printf("axisLoop=%d actions=%d", fAxisLoop, fActions ? fActions->GetSize() : -1);
+
+
+   Int_t nBinsX = h->GetNbinsX();
+   Int_t nBinsY = fTasks->GetEntries();
+   Printf("Creating TH2D with nBinsX=%d nBinsY=%d",nBinsX, nBinsY);
+
+   TH2D *hTmp = new TH2D(TString::Format("%s_h2",GetFullPath("_",kTRUE).Data()).Data(),
+                         TString::Format("%s (TmpH2)",GetFullPath("_",kTRUE).Data()).Data(),
+                         nBinsX, -0.5, nBinsX - 0.5,
+                         nBinsY, -0.5, nBinsY - 0.5);
+
+   fList->Add(hTmp);
+   TIter next(fTasks);
+   Int_t i,c=1;
+   while((se = (AliRsnSysErr *)next())) {
+      h = se->GetHistogram(nameTmp);
+      for (i=1; i<h->GetNbinsX()+1; i++) {
+         if (c==1) hTmp->GetXaxis()->SetBinLabel(i,TString::Format("%.2f",h->GetXaxis()->GetBinCenter(i)).Data());
+         hTmp->SetBinContent(i,c,h->GetBinContent(i));
+      }
+      hTmp->GetYaxis()->SetBinLabel(c,TString::Format("%s",se->GetName()).Data());
+      c++;
+   }
+//    hTmp->Draw("BOX");
+//    hTmp->Print("all");
+
+   Double_t *val, result;
+   Int_t n;
+   if (fAxisLoop == kX) {
+      n = h->GetNbinsX();
+      val = new Double_t[n];
+      c = 0;
+      next.Reset();
+      while((se = (AliRsnSysErr *)next())) {
+         h = se->GetHistogram(nameTmp);
+         for (i=1; i<n+1; i++) {
+            // set Array
+            val[i-1] = h->GetBinContent(i);
+         }
+
+         // apply all actions
+         fValue = fInitValue;
+         for (Int_t iAct=0; iAct < fActions->GetSize(); iAct++) {
+            result = Calculate((AliRsnSysErr::EActionType) TMath::Abs(fActions->At(iAct)), val, n);
+            if (fActions->At(iAct)>=0) {
+               fValue = result;
+            }
+            Printf("=== result[%d,%d]=%f fValue=%f", iAct, fActions->At(iAct), result, fValue);
+         }
+         c++;
+      }
+   } else if (fAxisLoop == kY) {
+      n=fTasks->GetEntries();
+      val = new Double_t[n];
+
+      for (i=1; i<h->GetNbinsX()+1; i++) {
+         c = 0;
+         next.Reset();
+         while((se = (AliRsnSysErr *)next())) {
+            h = se->GetHistogram(nameTmp);
+            // set Array
+            val[c++] = h->GetBinContent(i);
+         }
+         // calculate
+         for (Int_t j=0; j<n; j++)
+            Printf("val[%d,%d]=%f",i,j, val[j]);
+
+         fValue = fInitValue;
+         for (Int_t iAct=0; iAct < fActions->GetSize(); iAct++) {
+            result = Calculate((AliRsnSysErr::EActionType) TMath::Abs(fActions->At(iAct)), val, n);
+            if (fActions->At(iAct)>=0) {
+               fValue = result;
+            }
+            Printf("=== result[%d,%d]=%f fValue=%f", iAct, fActions->At(iAct), result, fValue);
+         }
+      }
+   }
+
+   delete [] val;
+
+}
+
+Double_t AliRsnSysErr::Calculate(AliRsnSysErr::EActionType actionType, Double_t *inputVal, Int_t n)
+{
+   switch (actionType) {
+      case kMin:
+         return AliRsnUtils::Min(inputVal, n);
+         break;
+      case kMax:
+         return AliRsnUtils::Max(inputVal, n);
+         break;
+      case kAverage:
+         return AliRsnUtils::Average(inputVal, n);
+         break;
+      case kMean:
+         // TODO bin centers
+         return AliRsnUtils::Mean(inputVal, n/*, binCenters*/);
+         break;
+      case kStdDev:
+         return AliRsnUtils::StdDev(inputVal, n);
+         break;
+      case kMinDev:
+         return AliRsnUtils::MinDev(inputVal, n, fValue);
+         break;
+      case kMaxDev:
+         return AliRsnUtils::MaxDev(inputVal, n, fValue);
+         break;
+      default:
+         break;
+   }
+   return 0.0;
 }
