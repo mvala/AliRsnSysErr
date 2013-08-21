@@ -22,18 +22,12 @@ public:
    virtual ~AliRsnTask();
 
    virtual void   Add(TTask *task);
-   virtual void   Add(AliRsnTask *se) {
-      Add((TTask *)se);
-   }
+   virtual void   Add(AliRsnTask *se) { Add((TTask *)se); }
    virtual void   Print(Option_t *option = "") const;
    virtual void   ExecuteTask(Option_t *option="");
 
-   void           SetParent(AliRsnTask *se) {
-      fParent = se;
-   }
-   AliRsnTask    *GetParent() const {
-      return fParent;
-   }
+   void           SetParent(AliRsnTask *se) { fParent = se; }
+   AliRsnTask    *GetParent() const { return fParent; }
    Int_t          GetLevel() const;
    TString        GetFullPath(TString delim="/", Bool_t removeFirstChar = kFALSE) const;
    AliRsnTask    *GetListByPath(TString path="/") const;

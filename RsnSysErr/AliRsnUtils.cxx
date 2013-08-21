@@ -12,7 +12,7 @@ TH1D *AliRsnUtils::Graph2Hist(TGraphErrors *gr, Bool_t useGraphEY, Double_t min)
    //
    // Creating Histogram (TH1D) from TGraphErrors
    //
-
+   
    // we return 0, if no grpah
    if ((!gr) || (!gr->GetN())) {
       ::Error("AliRsnUtils::Graph2Hist", "Graph 'gr' is null or has no points !!!");

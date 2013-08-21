@@ -235,7 +235,7 @@ Bool_t AliRsnSysErr::SetLevelAction(Int_t level, AliRsnSysErr::EType type, EActi
    TIter next(fTasks);
    AliRsnSysErr *se;
    Int_t l=0;
-   while ((se = (AliRsnSysErr *)next())) {
+   while ((se = (AliRsnSysErr*)next())) {
       if (se->GetLevel() == level) {
          se->SetType(type);
          se->SetActionType(actionType);

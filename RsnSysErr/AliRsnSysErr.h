@@ -10,7 +10,7 @@
 #ifndef ALIRSNSYSERR_H
 #define ALIRSNSYSERR_H
 
-#include <TList.h>
+#include <TBits.h>
 #include "AliRsnTask.h"
 
 class TH1D;
@@ -33,20 +33,15 @@ public:
    void           AddHistogramToList(TH1D *h, const char *postfix="orig");
    TH1D          *GetHistogram(const char *postfix="orig");
 
-   Bool_t         ImportDirectories(const char *name, const char *dir,
-                                    const char *filename="", const char *tmpl="%lg %lg %lg %lg");
-
-   void           SetType(EType t) {
-      fType = t;
-   }
-   void           SetActionType(EActionType t) {
-      fActionType = t;
-   }
+   Bool_t         ImportDirectories(const char *dir, const char *filename="", const char *tmpl="%lg %lg %lg %lg");
+   
+   void           SetType(EType t) { fType = t; }
+   void           SetActionType(EActionType t) { fActionType = t; }
    Bool_t         SetLevelAction(Int_t level, EType type, EActionType action);
 
 private:
 
-   TList          fList;        // list of histograms
+   TList         *fList;        // list of histograms
    EType          fType;        // type of output
    EActionType    fActionType;  // type of action
 

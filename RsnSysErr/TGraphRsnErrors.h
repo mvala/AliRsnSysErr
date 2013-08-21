@@ -24,15 +24,11 @@ public:
    virtual void  Paint(Option_t *chopt = "");
    virtual Int_t DistancetoPrimitive(Int_t px, Int_t py);
 
-   virtual Int_t  GetFlashPoint() const {
-      return fFlashPoint;
-   }
+   virtual Int_t  GetFlashPoint() const { return fFlashPoint; }
    static void    AroundFlash(Bool_t around = kTRUE);
    static Bool_t  IsAroundFlash();
    virtual void   SetShowFlash(Bool_t set = kTRUE, Option_t *option = ""); // *MENU*
-   virtual Bool_t GetShowFlash() const {
-      return fFlashMarker ? kTRUE : kFALSE;
-   }
+   virtual Bool_t GetShowFlash() const { return fFlashMarker ? kTRUE : kFALSE; }
    virtual void   Flash(Option_t *option = "");
 
 protected:
