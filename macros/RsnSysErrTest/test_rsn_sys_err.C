@@ -11,18 +11,22 @@ void test_rsn_sys_err()
 {
    Printf("Starting test ...");
    AliRsnSysErr *main = new AliRsnSysErr("MaxDev","My MaxDev");
-   main->ImportDirectories("pt", "~/Documents/Work/Presentations/2013/RESONANCE_2013-08-16/analysis/2013-08-16/pp_2.76_DATA_LHC11a_ESD/TPC30/0","RFE");
+   TString filePostfix = "R";
+   filePostfix = "RFE";
+   main->ImportDirectories("pt", "~/Documents/Work/Presentations/2013/RESONANCE_2013-08-16/analysis/2013-08-16/pp_2.76_DATA_LHC11a_ESD/TPC30/0",
+                           filePostfix.Data());
 
    Bool_t rc;
    AliRsnSysErr::ELoopAxis axisLoop;
    TArrayI *actions;
 
    axisLoop = AliRsnSysErr::kY;
-//    axisLoop = AliRsnSysErr::kX;
+   axisLoop = AliRsnSysErr::kX;
    Int_t nActions = 5;
    actions = new TArrayI(nActions);
    actions->AddAt(-AliRsnSysErr::kMax,0);
    actions->AddAt(AliRsnSysErr::kMean,1);
+//    actions->AddAt(AliRsnSysErr::kAverage,1);
    actions->AddAt(-AliRsnSysErr::kStdDev,2);
    actions->AddAt(-AliRsnSysErr::kMaxDev,3);
    actions->AddAt(-AliRsnSysErr::kMinDev,4);
@@ -30,7 +34,7 @@ void test_rsn_sys_err()
 //    actions->AddAt(AliRsnSysErr::kMaxDev,2);
 //    actions->AddAt(AliRsnSysErr::kMax,3);
 //    actions->AddAt(AliRsnSysErr::kAverage,4);
-   rc = main->SetLevelAction(0, actions, axisLoop, 1.2);
+   rc = main->SetLevelAction(0, actions, axisLoop, 0.0);
    if (!rc) return;
 
    main->Print();

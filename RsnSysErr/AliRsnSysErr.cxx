@@ -325,11 +325,12 @@ void AliRsnSysErr::Exec(Option_t *option)
 //    hTmp->Draw("BOX");
 //    hTmp->Print("all");
 
-   Double_t *val, result;
+   Double_t *val=0, *valExtra=0, result;
    Int_t n;
    if (fAxisLoop == kX) {
       n = h->GetNbinsX();
       val = new Double_t[n];
+      valExtra = new Double_t[n];
       c = 0;
       next.Reset();
       while((se = (AliRsnSysErr *)next())) {
@@ -337,12 +338,15 @@ void AliRsnSysErr::Exec(Option_t *option)
          for (i=1; i<n+1; i++) {
             // set Array
             val[i-1] = h->GetBinContent(i);
+            valExtra[i-1] = h->GetBinCenter(i);
          }
 
+         for (Int_t j=0; j<n; j++)
+            Printf("val[%d,%d]=%f",i,j, val[j]);
          // apply all actions
          fValue = fInitValue;
          for (Int_t iAct=0; iAct < fActions->GetSize(); iAct++) {
-            result = Calculate((AliRsnSysErr::EActionType) TMath::Abs(fActions->At(iAct)), val, n);
+            result = Calculate((AliRsnSysErr::EActionType) TMath::Abs(fActions->At(iAct)), val, n, valExtra);
             if (fActions->At(iAct)>=0) {
                fValue = result;
             }
@@ -378,10 +382,11 @@ void AliRsnSysErr::Exec(Option_t *option)
    }
 
    delete [] val;
+   delete [] valExtra;
 
 }
 
-Double_t AliRsnSysErr::Calculate(AliRsnSysErr::EActionType actionType, Double_t *inputVal, Int_t n)
+Double_t AliRsnSysErr::Calculate(AliRsnSysErr::EActionType actionType, Double_t *inputVal, Int_t n, Double_t *extraVal)
 {
    switch (actionType) {
       case kMin:
@@ -394,8 +399,7 @@ Double_t AliRsnSysErr::Calculate(AliRsnSysErr::EActionType actionType, Double_t 
          return AliRsnUtils::Average(inputVal, n);
          break;
       case kMean:
-         // TODO bin centers
-         return AliRsnUtils::Mean(inputVal, n/*, binCenters*/);
+         return AliRsnUtils::Mean(inputVal, n, extraVal);
          break;
       case kStdDev:
          return AliRsnUtils::StdDev(inputVal, n);

@@ -53,7 +53,7 @@ public:
 
    TArrayI       *GetActions() { return fActions; }
 
-   Double_t       Calculate(AliRsnSysErr::EActionType actionType, Double_t *inputVal, Int_t n);
+   Double_t       Calculate(AliRsnSysErr::EActionType actionType, Double_t *inputVal, Int_t n, Double_t *extraVal=0);
 
 private:
 
