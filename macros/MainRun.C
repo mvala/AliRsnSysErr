@@ -7,23 +7,23 @@
 void MainRun(TString macro, TString macro_argc, TString projectDir = "")
 {
 
-    gSystem->Load("libGui.so");
-    gSystem->Load("libRsnSysErr.so");
+   gSystem->Load("libGui.so");
+   gSystem->Load("libRsnSysErr.so");
 
-    gSystem->AddIncludePath(TString::Format("-I%sRsnSysErr", projectDir.Data()).Data());
-    TStopwatch timer;
-    timer.Start();
+   gSystem->AddIncludePath(TString::Format("-I%sRsnSysErr", projectDir.Data()).Data());
+   TStopwatch timer;
+   timer.Start();
 
-    if (!macro.IsNull()) {
-        if (macro.EndsWith(".C")) {
-            gROOT->ProcessLine(TString::Format(".L %s+", macro.Data()).Data());
-            macro.ReplaceAll(".C","");
-            gROOT->ProcessLine(TString::Format("%s(%s)", macro.Data(),macro_argc.Data()).Data());
-        }
-    }
+   if (!macro.IsNull()) {
+      if (macro.EndsWith(".C")) {
+         gROOT->ProcessLine(TString::Format(".L %s+", macro.Data()).Data());
+         macro.ReplaceAll(".C","");
+         gROOT->ProcessLine(TString::Format("%s(%s)", macro.Data(),macro_argc.Data()).Data());
+      }
+   }
 
-    timer.Stop();
-    timer.Print();
+   timer.Stop();
+   timer.Print();
 
-    Printf("Working dir: '%s'", gSystem->WorkingDirectory());
+   Printf("Working dir: '%s'", gSystem->WorkingDirectory());
 }
