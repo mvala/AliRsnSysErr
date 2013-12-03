@@ -23,7 +23,7 @@ void RsnRename(TString fileIn="AnalysisResults.root", TString outBase = "/tmp/al
    TKey *key;
    TIter next(f->GetListOfKeys());
    TList *l;
-   while ((key = (TKey*)next())) {
+   while ((key = (TKey *)next())) {
       key->Print();
       lOutExtraInfo = new TList();
       lOutExtraInfo->SetName("ExtraInfo");
@@ -39,10 +39,10 @@ void RsnRename(TString fileIn="AnalysisResults.root", TString outBase = "/tmp/al
       gSystem->mkdir(fileFullPath.Data(),kTRUE);
       fileFullPath+="/RsnOutput.root";
       fOut = TFile::Open(fileFullPath.Data() ,"RECREATE");
-      l = (TList*)key->ReadObj();
+      l = (TList *)key->ReadObj();
       TIter nextList(l);
       TObject *obj;
-      while((obj = (TObject*)nextList())) {
+      while((obj = (TObject *)nextList())) {
          TString sName = obj->GetName();
          if (obj->InheritsFrom("THnSparse")) {
             obj->Print();
@@ -51,9 +51,9 @@ void RsnRename(TString fileIn="AnalysisResults.root", TString outBase = "/tmp/al
             if (ignoreMixing && sName.Contains("Mixing")) continue;
             sName = sName(sName.Last('_')+1,sName.Length());
             Printf("%s",sName.Data());
-            THnSparse *clone = (THnSparse*) obj;
+            THnSparse *clone = (THnSparse *) obj;
             clone->SetName(sName);
-            for (Int_t i=0;i<clone->GetNdimensions();i++) {
+            for (Int_t i=0; i<clone->GetNdimensions(); i++) {
                TAxis *a = clone->GetAxis(i);
                a->SetName(axisName[i]);
             }

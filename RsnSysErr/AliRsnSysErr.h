@@ -29,7 +29,8 @@ public:
       kStdDev,
       kMinDev,
       kMaxDev,
-      kNActions };
+      kNActions
+   };
 
    AliRsnSysErr(const char *name="rse", const char *title="");
    AliRsnSysErr(const AliRsnSysErr &copy);
@@ -44,7 +45,7 @@ public:
    void           AddHistogramToList(TH1D *h, const char *postfix="orig");
    TH1D          *GetHistogram(const char *postfix="orig");
 
-   Bool_t         ImportDirectories(const char* postfix, const char* dir, const char* filename = "", const char* tmpl = "%lg %lg %lg %lg");
+   Bool_t         ImportDirectories(const char *postfix, const char *dir, const char *filename = "", const char *tmpl = "%lg %lg %lg %lg");
 
    void           SetAxisLoopType(ELoopAxis t) { fAxisLoop = t; }
    void           SetActions(TArrayI *actions) { fActions = actions; }

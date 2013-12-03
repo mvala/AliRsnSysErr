@@ -97,7 +97,7 @@ Int_t AliRsnTask::GetLevel() const
    //
    // Calculate level
    //
-   
+
    if (!fParent) return 0;
 
    Int_t level=0;

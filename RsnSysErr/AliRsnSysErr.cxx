@@ -298,91 +298,148 @@ void AliRsnSysErr::Exec(Option_t *option)
 
    TH1D *h = se->GetHistogram(nameTmp);
    if (!h) return;
-   Printf("axisLoop=%d actions=%d", fAxisLoop, fActions ? fActions->GetSize() : -1);
+   Printf("axisLoop=%d actions=%d", fAxisLoop, fActions->GetSize());
 
 
    Int_t nBinsX = h->GetNbinsX();
    Int_t nBinsY = fTasks->GetEntries();
    Printf("Creating TH2D with nBinsX=%d nBinsY=%d",nBinsX, nBinsY);
 
-   TH2D *hTmp = new TH2D(TString::Format("%s_h2",GetFullPath("_",kTRUE).Data()).Data(),
-                         TString::Format("%s (TmpH2)",GetFullPath("_",kTRUE).Data()).Data(),
+   TH2D *hSrc = new TH2D(TString::Format("%s_%s",GetFullPath("_",kTRUE).Data(), nameTmp).Data(),
+                         TString::Format("%s (%s)",GetFullPath("_",kTRUE).Data(), nameTmp).Data(),
                          nBinsX, -0.5, nBinsX - 0.5,
                          nBinsY, -0.5, nBinsY - 0.5);
+   fList->Add(hSrc);
 
-   fList->Add(hTmp);
+   TH2D *hOutX = 0, *hOutY = 0;
+   if (fActions->GetSize()>0) {
+      hOutX = new TH2D(TString::Format("%s_%s_X",GetFullPath("_",kTRUE).Data(), nameTmp).Data(),
+                       TString::Format("%s (%s) X",GetFullPath("_",kTRUE).Data(), nameTmp).Data(),
+                       nBinsX, -0.5, nBinsX - 0.5,
+                       fActions->GetSize(), 0.5, fActions->GetSize() + 0.5);
+      fList->Add(hOutX);
+      hOutY = new TH2D(TString::Format("%s_%s_Y",GetFullPath("_",kTRUE).Data(), nameTmp).Data(),
+                       TString::Format("%s (%s) Y",GetFullPath("_",kTRUE).Data(), nameTmp).Data(),
+                       nBinsY, -0.5, nBinsY - 0.5,
+                       fActions->GetSize(), 0.5, fActions->GetSize() + 0.5);
+      fList->Add(hOutY);
+   }
+
    TIter next(fTasks);
-   Int_t i,c=1;
+   Int_t i, j, c=1;
+   Int_t n = h->GetNbinsX();
+   Double_t *binCenters = new Double_t[n];
    while((se = (AliRsnSysErr *)next())) {
       h = se->GetHistogram(nameTmp);
-      for (i=1; i<h->GetNbinsX()+1; i++) {
-         if (c==1) hTmp->GetXaxis()->SetBinLabel(i,TString::Format("%.2f",h->GetXaxis()->GetBinCenter(i)).Data());
-         hTmp->SetBinContent(i,c,h->GetBinContent(i));
+      for (i=1; i<=n; i++) {
+         if (c==1) {
+            hSrc->GetXaxis()->SetBinLabel(i,TString::Format("%.2f",h->GetXaxis()->GetBinCenter(i)).Data());
+            hOutX->GetXaxis()->SetBinLabel(i,TString::Format("%.2f",h->GetXaxis()->GetBinCenter(i)).Data());
+         }
+         hSrc->SetBinContent(i,c,h->GetBinContent(i));
+         binCenters[i-1] = h->GetBinCenter(i);
       }
-      hTmp->GetYaxis()->SetBinLabel(c,TString::Format("%s",se->GetName()).Data());
+      hSrc->GetYaxis()->SetBinLabel(c,TString::Format("%s",se->GetName()).Data());
+      hOutY->GetXaxis()->SetBinLabel(c,TString::Format("%s",se->GetName()).Data());
+
       c++;
    }
-//    hTmp->Draw("BOX");
-//    hTmp->Print("all");
 
-   Double_t *val=0, *valExtra=0, result;
-   Int_t n;
-   if (fAxisLoop == kX) {
-      n = h->GetNbinsX();
-      val = new Double_t[n];
-      valExtra = new Double_t[n];
-      c = 0;
-      next.Reset();
-      while((se = (AliRsnSysErr *)next())) {
-         h = se->GetHistogram(nameTmp);
-         for (i=1; i<n+1; i++) {
-            // set Array
-            val[i-1] = h->GetBinContent(i);
-            valExtra[i-1] = h->GetBinCenter(i);
-         }
-
-         for (Int_t j=0; j<n; j++)
-            Printf("val[%d,%d]=%f",i,j, val[j]);
-         // apply all actions
-         fValue = fInitValue;
-         for (Int_t iAct=0; iAct < fActions->GetSize(); iAct++) {
-            result = Calculate((AliRsnSysErr::EActionType) TMath::Abs(fActions->At(iAct)), val, n, valExtra);
-            if (fActions->At(iAct)>=0) {
-               fValue = result;
-            }
-            Printf("=== result[%d,%d]=%f fValue=%f", iAct, fActions->At(iAct), result, fValue);
-         }
-         c++;
+   // LoopAxis X
+   Double_t result;
+   Int_t iAct;
+   Double_t *val=0;
+   n = hSrc->GetNbinsY();
+   val = new Double_t[n];
+   for(i=0; i<hSrc->GetNbinsX();i++) {
+      for(j=0; j<n;j++) {
+         val[j] = hSrc->GetBinContent(i,j);
       }
-   } else if (fAxisLoop == kY) {
-      n=fTasks->GetEntries();
-      val = new Double_t[n];
-
-      for (i=1; i<h->GetNbinsX()+1; i++) {
-         c = 0;
-         next.Reset();
-         while((se = (AliRsnSysErr *)next())) {
-            h = se->GetHistogram(nameTmp);
-            // set Array
-            val[c++] = h->GetBinContent(i);
+      for (iAct=0; iAct < fActions->GetSize(); iAct++) {
+         result = Calculate((AliRsnSysErr::EActionType) TMath::Abs(fActions->At(iAct)), val, n, binCenters);
+         if (fActions->At(iAct)>=0) {
+            fValue = result;
          }
-         // calculate
-         for (Int_t j=0; j<n; j++)
-            Printf("val[%d,%d]=%f",i,j, val[j]);
-
-         fValue = fInitValue;
-         for (Int_t iAct=0; iAct < fActions->GetSize(); iAct++) {
-            result = Calculate((AliRsnSysErr::EActionType) TMath::Abs(fActions->At(iAct)), val, n);
-            if (fActions->At(iAct)>=0) {
-               fValue = result;
-            }
-            Printf("=== result[%d,%d]=%f fValue=%f", iAct, fActions->At(iAct), result, fValue);
-         }
+         hOutX->SetBinContent(i,iAct+1, result);
+         Printf("=== result[%d,%d]=%f fValue=%f", iAct, fActions->At(iAct), result, fValue);
       }
    }
-
    delete [] val;
-   delete [] valExtra;
+
+   // LoopAxis Y
+   n = hSrc->GetNbinsX();
+   for(i=0; i<hSrc->GetNbinsY();i++) {
+      for(j=0; j<n;j++) {
+
+      }
+
+   }
+
+   delete [] binCenters;
+   return ;
+
+//    hSrc->Draw("BOX");
+//    hSrc->Print("all");
+
+//    Double_t *val=0, *valExtra=0;
+//    Int_t n;
+//    if (fAxisLoop == kX) {
+//       n = h->GetNbinsX();
+//       val = new Double_t[n];
+//       valExtra = new Double_t[n];
+//       c = 0;
+//       next.Reset();
+//       while((se = (AliRsnSysErr *)next())) {
+//          h = se->GetHistogram(nameTmp);
+//          for (i=1; i<n+1; i++) {
+//             // set Array
+//             val[i-1] = h->GetBinContent(i);
+//             valExtra[i-1] = h->GetBinCenter(i);
+//          }
+//
+//          for (Int_t j=0; j<n; j++)
+//             Printf("val[%d,%d]=%f",i,j, val[j]);
+//          // apply all actions
+//          fValue = fInitValue;
+//          for (Int_t iAct=0; iAct < fActions->GetSize(); iAct++) {
+//             result = Calculate((AliRsnSysErr::EActionType) TMath::Abs(fActions->At(iAct)), val, n, valExtra);
+//             if (fActions->At(iAct)>=0) {
+//                fValue = result;
+//             }
+//
+//             Printf("=== result[%d,%d]=%f fValue=%f", iAct, fActions->At(iAct), result, fValue);
+//          }
+//          c++;
+//       }
+//    } else if (fAxisLoop == kY) {
+//       n=fTasks->GetEntries();
+//       val = new Double_t[n];
+//
+//       for (i=1; i<h->GetNbinsX()+1; i++) {
+//          c = 0;
+//          next.Reset();
+//          while((se = (AliRsnSysErr *)next())) {
+//             h = se->GetHistogram(nameTmp);
+//             // set Array
+//             val[c++] = h->GetBinContent(i);
+//          }
+//          // calculate
+//          for (Int_t j=0; j<n; j++)
+//             Printf("val[%d,%d]=%f",i,j, val[j]);
+//
+//          fValue = fInitValue;
+//          for (Int_t iAct=0; iAct < fActions->GetSize(); iAct++) {
+//             result = Calculate((AliRsnSysErr::EActionType) TMath::Abs(fActions->At(iAct)), val, n);
+//             if (fActions->At(iAct)>=0) {
+//                fValue = result;
+//             }
+//             Printf("=== result[%d,%d]=%f fValue=%f", iAct, fActions->At(iAct), result, fValue);
+//          }
+//       }
+//    }
+//
+//    delete [] val;
+//    delete [] valExtra;
 
 }
 
